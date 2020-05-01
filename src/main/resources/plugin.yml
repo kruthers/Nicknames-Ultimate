@@ -1,0 +1,76 @@
+name: Nicknames
+version: ${project.version}
+api-version: 1.15
+main: com.kruthers.nicknames.Nicknames
+authors: [kruthers]
+softdepend:
+  - PlaceholderAPI
+  - Vault
+description: Nickname plugin by kruthers
+website: www.kruthers.com
+commands:
+  realname:
+    description: Display a players real name
+    usage: /<command> <nickname>
+    permission: nicknames.realname
+  nicknames:
+    description: Core command for nicknames for Gamemode 4
+    usage: /<command> <version|help|reloadconfig>
+    permission: nicknames.default
+  nickname:
+    description: Change a players nickname
+    usage: /<command> [nickname] [player]
+    aliases: nick
+    permission: nicknames.nickname
+  resetnickname:
+    description: Reset a players nickname
+    usage: /<command> [player]
+    aliases: resetnick
+    permission: nicknames.nickname
+permissions:
+  nicknames.default:
+    description: allows for /nicknames
+    default: true
+  nicknames.realname:
+    description: allows for /realname
+    default: true
+  nicknames.nickname:
+    description: allows for /nickname
+    default: true
+  nicknames.colour:
+    description: allows for the use of colour in a nickname
+    default: op
+  nicknames.formatting:
+    description: allows for the use of formating in a nickname
+    default: op
+  nicknames.anycharacter:
+    description: Allows for the use of any chacator in a nickname
+    default: op
+  nicknames.reload:
+    description: Allows you to reload the plugin
+    default: op
+  nicknames.bypass:
+    description: Bypass any checks
+    default: false
+  nicknames.bypassprefix:
+    description: bypass the prefix
+    default: false
+  nicknames.nickname.others:
+    description: allows for /nickname on others
+    default: op
+    children:
+      nicknames.nickname: true
+  nicknames.*:
+    description: Wildcard permissions for nicknames
+    default: false
+    children:
+      nicknames.default: true
+      nicknames.realname: true
+      nicknames.nickname: true
+      nicknames.colour: true
+      nicknames.formatting: true
+      nicknames.anycharacter: true
+      nicknames.reload: true
+      nicknames.bypass: true
+      nicknames.bypassprefix: true
+      nicknames.nickname.others: true

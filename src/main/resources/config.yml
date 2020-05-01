@@ -1,0 +1,41 @@
+# ------------------------ #
+#    Nicknames Ultimate    #
+#       by kruthers        #
+# ------------------------ # ----------------------------------------------------- #
+# Prefix - Character that you want to display in front of any nicknames
+# max_length - The max length of which the nickname can be
+# min_length - Sets what the minimum length of a nickname can be
+# block_formatting - If true formatting will be blocked for anyone that does not bypass checks
+# blocked_words - A list of word blocked from use in nicknames
+# autosave_data - Controls if the nicknames.json will get updated on auto-save or not
+# check_on_join - Checks if a users still has the perms for their nicknames when they join
+# check_duplicate - If true it will check if that username is already in use
+# set_player_list_name -  If true the plugin will attempt to change your name in tab
+# player_list_name_format - Format used to change your player list name to
+# colour_character - Char used to represent colour codes
+# messages - These are the messages used by the plugin, they will use the colour code format set by colour_character
+# --------------------------------------------------------------------------------- #
+prefix: '~'
+max_length: 16
+min_length: 3
+block_formatting: false
+blocked_words:
+  - fuck
+  - shit
+autosave_data: true
+check_on_join: true
+check_duplicate: true
+check_is_user: true
+set_player_list_name: true
+player_list_name_format: '{display_name}'
+colour_character: '&'
+messages:
+  unknown_error: '&4An Unknown error occurred when executing that command, please try again later'
+  no_permission: '&4You dont have permission to run that command'
+  nickname:
+    too_short: '&4Sorry, that nickname is too short'
+    too_long: '&4Sorry, that nickname is too long'
+    taken: '&4Sorry, that name is already in use'
+    illegal_formatting: '&4Sorry, that nickname contains blocked/ invalid formatting, please try again'
+    banned_word: '&4Sorry, that nickname contains a blocked word'
+    username: '&4Sorry, nicknames cant be other players names'
