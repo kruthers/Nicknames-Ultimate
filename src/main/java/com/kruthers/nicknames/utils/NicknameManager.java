@@ -21,7 +21,7 @@ public class NicknameManager {
             String checkNick = nicknameData.get(uuid);
             checkNick=Utils.removeAllFormatting(checkNick);
             if (checkNick.equalsIgnoreCase(nick)){
-                return Bukkit.getPlayer(uuid);
+                return Bukkit.getOfflinePlayer(uuid);
             }
         }
 
