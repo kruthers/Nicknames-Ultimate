@@ -1,78 +1,84 @@
 package com.kruthers.nicknames.utils;
 
-import com.kruthers.nicknames.Nicknames;
-import org.bukkit.Bukkit;
+import com.kruthers.nicknames.NicknamesUltimate;
+import com.kruthers.nicknames.utils.storage.FileStorage;
+import com.kruthers.nicknames.utils.storage.MySQL;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class NicknameManager {
-    private static final Nicknames plugin = Nicknames.getPlugin(Nicknames.class);
+    private static final NicknamesUltimate plugin = NicknamesUltimate.getPlugin(NicknamesUltimate.class);
+    private static final Logger LOGGER = plugin.getLogger();
 
-    public static OfflinePlayer getUsername(String nick){
-        HashMap<UUID,String> nicknameData = Nicknames.getNicknameData();
-        for (UUID uuid : nicknameData.keySet()){
-            String checkNick = nicknameData.get(uuid);
-            checkNick=Utils.removeAllFormatting(checkNick);
-            if (checkNick.equalsIgnoreCase(nick)){
-                return Bukkit.getOfflinePlayer(uuid);
-            }
+    public static List<OfflinePlayer> getPlayerFromNick(String nick){
+        if (NicknamesUltimate.storageMethod.equalsIgnoreCase("file")) {
+            return FileStorage.getPlayers(nick);
+        } else if (NicknamesUltimate.storageMethod.equalsIgnoreCase("mysql")) {
+            return MySQL.getPlayers(nick);
         }
 
         return null;
     }
 
-    public static String getNickname(UUID checkUUID){
-        HashMap<UUID,String> nicknameData = Nicknames.getNicknameData();
-        if (nicknameData.size()==0) { return null; }
-
-        return nicknameData.get(checkUUID);
-    }
-
-    public static void updateNicknameList(){
-        ArrayList<String> nicknameList = new ArrayList<>();
-        for (String nick : Nicknames.getNicknameData().values()){
-            nick = Utils.removeAllFormatting(nick);
-            nicknameList.add(nick.toLowerCase());
-        }
-        Nicknames.setNicknames(nicknameList);
-    }
-
-
     public static int setNickname(Player target, String newNick, CommandSender executor, boolean performChecks){
-        FileConfiguration config = plugin.getConfig();
         String unformattedNick = Utils.removeAllFormatting(newNick).toLowerCase();
-        boolean checkDuplicate = plugin.getConfig().getBoolean("check_duplicate");
+        boolean checkDuplicate = plugin.getConfig().getBoolean("nickname_settings.check_duplicate");
+        boolean checkPlayer = plugin.getConfig().getBoolean("nickname_settings.check_if_user");
 
-        if (performChecks){
-            if (unformattedNick.length()<config.getInt("min_length")){
+        if (performChecks) {
+            if (unformattedNick.length()<plugin.getConfig().getInt("nickname_settings.min_length")){
                 return 2;
-            } else if (unformattedNick.length()>config.getInt("max_length")){
+            } else if (unformattedNick.length()>plugin.getConfig().getInt("nickname_settings.max_length")){
                 return 3;
-            } else if (checkNicknameList(unformattedNick,target.getUniqueId()) && checkDuplicate){
-                return 4;
-            } else if (Utils.checkIllegalFormatting(newNick,executor)){
+            }  else if (Utils.checkIllegalFormatting(newNick,executor)){
                 return 5;
             } else if (Utils.checkBannedWorks(unformattedNick)){
                 return 6;
-            } else if (Utils.checkUsername(unformattedNick,target.getUniqueId()) && checkDuplicate){
-                return 7;
             }
+
+            if (NicknamesUltimate.storageMethod.equalsIgnoreCase("file")) {
+                if (checkDuplicate && FileStorage.checkNicknameList(unformattedNick,target.getUniqueId())) {
+                    return 4;
+                } else if (checkPlayer && FileStorage.checkUsername(unformattedNick,target.getUniqueId())) {
+                    return 7;
+                }
+            } else if (NicknamesUltimate.storageMethod.equalsIgnoreCase("mysql") && checkDuplicate) {
+                try {
+                    if (checkDuplicate && MySQL.checkNick(unformattedNick,target.getUniqueId())){
+                        return 4;
+                    } else if (checkPlayer && MySQL.checkUsername(unformattedNick,target.getUniqueId())) {
+                        return 8;
+                    }
+                } catch (SQLException err){
+                    LOGGER.warning("An unknown exception occurred when checking a nickname against the database: \n"+err.getMessage());
+                    return -1;
+                }
+            }
+
         }
 
-        HashMap<UUID,String> nicknamesData=Nicknames.getNicknameData();
-        nicknamesData.put(target.getUniqueId(),newNick);
-        Nicknames.setNicknameData(nicknamesData);
-        updateNicknameList();
+        switch (NicknamesUltimate.storageMethod){
+            case "file":
+                FileStorage.saveNick(target,newNick);
+                break;
+            case "mysql":
+                try {
+                    MySQL.update_nick(newNick,target);
+                } catch (SQLException err){
+                    LOGGER.warning("An unknown exception occurred when saving a players new nickname: \n"+err.getMessage());
+                    return -1;
+                }
+        }
 
         if (!target.hasPermission("nicknames.bypassprefix")) {
-            newNick = config.getString("prefix") + newNick;
+            newNick = plugin.getConfig().getString("nickname_settings.prefix") + newNick;
         }
         newNick=newNick+ ChatColor.RESET;
         Utils.updateName(target,newNick);
@@ -80,44 +86,28 @@ public class NicknameManager {
         return 0;
     }
 
-    public static void removeNick(UUID uuid){
-        HashMap<UUID,String> nicknamesData=Nicknames.getNicknameData();
-        nicknamesData.remove(uuid);
-        Nicknames.setNicknameData(nicknamesData);
-        updateNicknameList();
-    }
-
-    private static boolean checkNicknameList(String nick,UUID ignored){
-        if (!Nicknames.getNicknames().contains(nick.toLowerCase())){ return false; }
-
-        HashMap<UUID,String> nicknameDate = Nicknames.getNicknameData();
-        for (UUID uuid : nicknameDate.keySet()){
-            String string=Utils.removeAllFormatting(nicknameDate.get(uuid));
-            if (nick.equalsIgnoreCase(string) && !ignored.toString().equals(uuid.toString())){
-                return true;
-            }
+    public static void removeNick(Player player){
+        switch (NicknamesUltimate.storageMethod){
+            case "file":
+                FileStorage.removeNick(player);
+                break;
+            case "mysql":
+                try {
+                    MySQL.update_nick(null,player);
+                } catch (SQLException err) {
+                    LOGGER.warning("An unknown exception occurred when removing a players nickname: \n"+err.getMessage());
+                }
         }
-        return false;
     }
 
-
-    @Deprecated
-    public static void updateNick(String uuid, String newNick){
-        HashMap<UUID,String> nicknamesData=Nicknames.getNicknameData();
-        nicknamesData.put(UUID.fromString(uuid),newNick);
-        Nicknames.setNicknameData(nicknamesData);
-        updateNicknameList();
-    }
-
-    @Deprecated
-    public static boolean removeNick(String uuid){
-        HashMap<UUID,String> nicknamesData=Nicknames.getNicknameData();
-        if (nicknamesData.remove(UUID.fromString(uuid))!=null){
-            Nicknames.setNicknameData(nicknamesData);
-            updateNicknameList();
-            return true;
-        } else {
-            return false;
+    public static Collection<String> getNicknames(){
+        switch (NicknamesUltimate.storageMethod){
+            case "file":
+                return FileStorage.getNicknames();
+            case "mysql":
+                return MySQL.getNicknames();
+            default:
+                return new ArrayList<>();
         }
     }
 

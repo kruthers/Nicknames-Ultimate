@@ -1,6 +1,24 @@
+/*
+ * Nickname Ultimate - A comprehensive  nickname plugin for spigot
+ * Copyright (C) 2020 kruthers
+ *
+ * This Program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The program  is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.kruthers.nicknames.commands;
 
-import com.kruthers.nicknames.Nicknames;
+import com.kruthers.nicknames.NicknamesUltimate;
 import com.kruthers.nicknames.utils.NicknameManager;
 import com.kruthers.nicknames.utils.Utils;
 import org.bukkit.ChatColor;
@@ -14,8 +32,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Nickname implements CommandExecutor{
-    private Nicknames plugin;
-    public Nickname(Nicknames coreClass){
+    private NicknamesUltimate plugin;
+    public Nickname(NicknamesUltimate coreClass){
         plugin=coreClass;
     }
 
@@ -26,11 +44,10 @@ public class Nickname implements CommandExecutor{
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         FileConfiguration config = plugin.getConfig();
         if (alias.contains(command.getLabel().toLowerCase())){
-            char altColourCode = config.getString("colour_character").toCharArray()[0];
             if (args.length==0) {
                 if (sender instanceof Player){
                     Player player = (Player)sender;
-                    NicknameManager.removeNick(player.getUniqueId());
+                    NicknameManager.removeNick(player);
                     Utils.updateName(player,player.getName());
                     sender.sendMessage(ChatColor.GREEN+"Reset your nickname");
                 } else {
@@ -42,7 +59,7 @@ public class Nickname implements CommandExecutor{
                     Player player = (Player)sender;
                     String nick = args[0];
                     if (nick.equalsIgnoreCase(player.getName()) || nick.equalsIgnoreCase("reset")) {
-                        NicknameManager.removeNick(player.getUniqueId());
+                        NicknameManager.removeNick(player);
                         Utils.updateName(player,player.getName());
                         sender.sendMessage(ChatColor.GREEN+"Reset your nickname");
                         return true;
@@ -50,15 +67,14 @@ public class Nickname implements CommandExecutor{
 
                     int error_code=NicknameManager.setNickname(player,nick,player,true);
                     if (error_code==0){
-                        sender.sendMessage(ChatColor.GREEN+"Your nickname has successfully been set to: "+ChatColor.translateAlternateColorCodes(altColourCode,args[0]));
+                        sender.sendMessage(ChatColor.GREEN+"Your nickname has successfully been set to: "+ChatColor.translateAlternateColorCodes('&',args[0]));
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes(altColourCode,Utils.getErrorMessage(error_code)));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',Utils.getErrorMessage(error_code)));
                     }
-                    return true;
                 } else {
                     sender.sendMessage(ChatColor.RED+"Only players can use this command, instead use: /nickname <nickname> [player]");
-                    return true;
                 }
+                return true;
             } else if (args.length==2){
                 if (sender.hasPermission("nicknames.nickname.others")) {
                     String playerName=args[1];
@@ -78,9 +94,9 @@ public class Nickname implements CommandExecutor{
 
                     if (error_code==0){
                         sender.sendMessage(ChatColor.GREEN+"Successfully changed "+target.getName()+" nickname too "+nickname);
-                        target.sendMessage(ChatColor.GREEN+"Your nickname has been changed to: "+ChatColor.translateAlternateColorCodes(altColourCode,nickname)+" by "+sender.getName());
+                        target.sendMessage(ChatColor.GREEN+"Your nickname has been changed to: "+ChatColor.translateAlternateColorCodes('&',nickname)+" by "+sender.getName());
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes(altColourCode,Utils.getErrorMessage(error_code)));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',Utils.getErrorMessage(error_code)));
                     }
                     return true;
                 } else {

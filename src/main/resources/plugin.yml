@@ -1,7 +1,7 @@
-name: Nicknames
+name: NicknamesUltimate
 version: ${project.version}
 api-version: 1.15
-main: com.kruthers.nicknames.Nicknames
+main: com.kruthers.nicknames.NicknamesUltimate
 authors: [kruthers]
 softdepend:
   - PlaceholderAPI
@@ -13,8 +13,8 @@ commands:
     description: Display a players real name
     usage: /<command> <nickname>
     permission: nicknames.realname
-  nicknames:
-    description: Core command for nicknames for Gamemode 4
+  nicknamesultimate:
+    description: Core command for nicknames ultimate
     usage: /<command> <version|help|reloadconfig>
     permission: nicknames.default
   nickname:
