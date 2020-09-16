@@ -1,6 +1,7 @@
 package com.kruthers.nicknames.utils;
 
 import com.kruthers.nicknames.NicknamesUltimate;
+import com.kruthers.nicknames.commands.TogglePrefix;
 import com.kruthers.nicknames.utils.storage.FileStorage;
 import com.kruthers.nicknames.utils.storage.MySQL;
 import org.bukkit.ChatColor;
@@ -77,7 +78,7 @@ public class NicknameManager {
                 }
         }
 
-        if (!target.hasPermission("nicknames.bypassprefix")) {
+        if (!TogglePrefix.hidden_players.contains(target.getUniqueId())) {
             newNick = plugin.getConfig().getString("nickname_settings.prefix") + newNick;
         }
         newNick=newNick+ ChatColor.RESET;

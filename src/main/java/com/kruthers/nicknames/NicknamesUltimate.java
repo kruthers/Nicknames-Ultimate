@@ -71,6 +71,7 @@ public final class NicknamesUltimate extends JavaPlugin {
 
         LOGGER.info("Plugins hooked. Loading and verifying config...");
         ConfigManagement.init();
+        storageMethod=getConfig().getString("storage.type");
         LOGGER.info("Loaded config. Loading nickname Data...");
 
         switch (storageMethod){
@@ -108,10 +109,13 @@ public final class NicknamesUltimate extends JavaPlugin {
         this.getCommand("nicknamesultimate").setExecutor(new CoreCommand(this));
         this.getCommand("nickname").setExecutor(new Nickname(this));
         this.getCommand("resetnickname").setExecutor(new ResetNickname(this));
+        this.getCommand("toggleprefix").setExecutor(new TogglePrefix(this));
 
         this.getCommand("realname").setTabCompleter(new RealNameTabCompleter());
         this.getCommand("nicknamesultimate").setTabCompleter(new CoreCommandTabCompleter());
         this.getCommand("nickname").setTabCompleter(new NicknameTabCompleter());
+        this.getCommand("resetnickname").setTabCompleter(new SinglePlayerArgTabCompleter());
+        this.getCommand("toggleprefix").setTabCompleter(new SinglePlayerArgTabCompleter());
         LOGGER.info("Commands set, registering events");
 
         //load events

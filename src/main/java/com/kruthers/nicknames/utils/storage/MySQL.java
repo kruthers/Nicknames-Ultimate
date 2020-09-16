@@ -52,10 +52,13 @@ public class MySQL {
             String password = plugin.getConfig().getString("storage.database.password");
             String database = plugin.getConfig().getString("storage.database.database");
 
+            Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection("mysql://"+host+":"+port+"/"+database,username,password);
             connected=true;
-        } catch (Exception err) {
-            LOGGER.warning("Failed to start plugin during database connection phase with "+err.getMessage());
+        } catch (ClassNotFoundException err) {
+            LOGGER.severe("No valid mysql driver installed, make sure to installed one before continuing: "+err.getMessage());
+        } catch (SQLException err) {
+            LOGGER.severe("Failed to start plugin during database connection phase with "+err.getMessage());
             return false;
         }
 

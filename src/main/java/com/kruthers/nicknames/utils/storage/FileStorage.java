@@ -36,6 +36,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FileStorage {
     private static final NicknamesUltimate plugin = NicknamesUltimate.getPlugin(NicknamesUltimate.class);
@@ -45,6 +47,8 @@ public class FileStorage {
     private static final File nicknamesFile = new File(PLUGIN_FILE+"nicknames.json");
 
     private static HashMap<UUID,String> nicknameData = new HashMap<>();
+
+    private static final Pattern UUIDregex = Pattern.compile("(\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12})");
 
 
     //File Management
@@ -139,7 +143,6 @@ public class FileStorage {
     public static void saveNick(Player player, String newNick){
 
         nicknameData.put(player.getUniqueId(),newNick);
-        LOGGER.info(nicknameData.toString());
     }
 
     public static void removeNick(Player player){
@@ -162,16 +165,21 @@ public class FileStorage {
 
 
     public static boolean checkUsername(String nickname,UUID exclude){
-        for (World world: Bukkit.getServer().getWorlds()){
+        for (World world: Bukkit.getServer().getWorlds()) {
             File playerData = new File(world.getWorldFolder()+"/playerdata/");
-            for (File file: playerData.listFiles()){
-                UUID uuid = UUID.fromString(file.getName().replaceAll(".dat$", ""));
-                if(!uuid.equals(exclude)){
-                    OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
-                    if (p.getName()==null){
-                        return false;
-                    } else if (p.getName().equalsIgnoreCase(nickname)) {
-                        return true;
+            if (playerData.exists()) {
+                for (File file: playerData.listFiles()){
+                    Matcher matcher = UUIDregex.matcher(file.getName());
+                    if (matcher.find()){
+                        UUID uuid = UUID.fromString(matcher.group(1));
+                        if(!uuid.equals(exclude)){
+                            OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
+                            if (p.getName()==null){
+                                return false;
+                            } else if (p.getName().equalsIgnoreCase(nickname)) {
+                                return true;
+                            }
+                        }
                     }
                 }
             }

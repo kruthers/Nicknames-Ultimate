@@ -27,6 +27,10 @@ commands:
     usage: /<command> [player]
     aliases: resetnick
     permission: nicknames.nickname
+  toggleprefix:
+    description: Toggle the prefix infront of your nickname
+    usage: /<command> [player]
+    permission: nicknames.bypassprefix
 permissions:
   nicknames.default:
     description: allows for /nicknames

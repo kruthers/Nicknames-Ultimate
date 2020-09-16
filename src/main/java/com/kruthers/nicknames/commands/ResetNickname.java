@@ -40,7 +40,7 @@ public class ResetNickname implements CommandExecutor {
                 Utils.updateName(player,player.getName());
                 sender.sendMessage(ChatColor.GREEN+"Reset your nickname");
             } else {
-                sender.sendMessage(ChatColor.RED+"Only players can use this instead: /resetnick <user>");
+                sender.sendMessage(ChatColor.RED+"Only players can use this instead: /resetnick [user]");
             }
         } else if (args.length==1){
             String playerName=args[0];
